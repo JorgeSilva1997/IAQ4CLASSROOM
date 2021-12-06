@@ -3,7 +3,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
 ![GitHub open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge)
 
-<img src="iaq.jpg" alt="exemplo imagem" width="25%">
+<img src="IAQ4Classroom.png" alt="exemplo imagem" width="100%">
 
 <!-- > IAQ4CLASSROOM  Project -->
 
@@ -11,11 +11,11 @@
 
 The project is still under development and future updates will focus on the following tasks:
 <!-- - [x] Tarefa 1 -->
-- [ ] Tarefa 1 
-- [ ] Tarefa 2
-- [ ] Tarefa 3
-- [ ] Tarefa 4
-- [ ] Tarefa 5
+- [ ] Task 1 
+- [ ] Task 2
+- [ ] Task 3
+- [ ] Task 4
+- [ ] Task 5
 <br>
 
 
