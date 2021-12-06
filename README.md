@@ -1,7 +1,7 @@
 # IAQ4CLASSROOM 
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
-![GitHub open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge)
+<!-- ![GitHub open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge) -->
 
 
 <img src="IAQ4Classroom.png" alt="exemplo imagem" width="100%">
@@ -59,9 +59,9 @@ Device: DIAQ06
 
 
 
-## 🤝 Colaboradores
+## 🤝 Collaborators
 
-People who contributed to this project:
+<!-- People who contributed to this project: -->
 
 <table>
   <tr>
