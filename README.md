@@ -3,6 +3,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
 ![GitHub open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge)
 
+
 <img src="IAQ4Classroom.png" alt="exemplo imagem" width="100%">
 
 <!-- > IAQ4CLASSROOM  Project -->
@@ -16,6 +17,8 @@ The project is still under development and future updates will focus on the foll
 - [ ] Task 3
 - [ ] Task 4
 - [ ] Task 5
+- [ ] Task 6
+    - [ ] Sub Task
 <br>
 
 
@@ -47,6 +50,14 @@ Device: DIAQ06
 <hr><br>
 
 
+### Useful Links
+
+ [SMART-IPVC Plataform](http://smart.ipvc.pt/projects/)<br>
+ [IAQ Dashboard](http://smart.ipvc.pt:4062/#/login)<br>
+ [Technical Report](https://www.overleaf.com/read/kwktbmybzfxk)<br>
+<br>
+
+
 
 ## 🤝 Colaboradores
 
@@ -74,6 +85,14 @@ People who contributed to this project:
       <a href="#">
         <img src="https://cdn-icons-png.flaticon.com/512/2922/2922524.png" width="100px;" alt="Foto do Steve Jobs"/><br>
         <sub>
+          <b>António Curado</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="#">
+        <img src="https://cdn-icons-png.flaticon.com/512/2922/2922524.png" width="100px;" alt="Foto do Steve Jobs"/><br>
+        <sub>
           <b>Jorge Silva</b>
         </sub>
       </a>
@@ -83,6 +102,14 @@ People who contributed to this project:
         <img src="https://cdn-icons-png.flaticon.com/512/2922/2922524.png" width="100px;" alt="Foto do Steve Jobs"/><br>
         <sub>
           <b>Miguel Oliveira</b>
+        </sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="#">
+        <img src="https://cdn-icons-png.flaticon.com/512/2922/2922524.png" width="100px;" alt="Foto do Steve Jobs"/><br>
+        <sub>
+          <b>António Abreu</b>
         </sub>
       </a>
     </td>
