@@ -4,7 +4,7 @@
 <!-- ![GitHub open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge) -->
 
 
-<img src="images/IAQ4Classroom.png" alt="exemplo imagem" width="100%">
+<img src="Images/IAQ4Classroom.png" alt="exemplo imagem" width="100%">
 
 <!-- > IAQ4CLASSROOM  Project -->
 
