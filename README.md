@@ -55,6 +55,7 @@ Device: DIAQ06
  [SMART-IPVC Plataform](http://smart.ipvc.pt/projects/)<br>
  [IAQ Dashboard](http://smart.ipvc.pt:4062/#/login)<br>
  [Technical Report](https://www.overleaf.com/read/kwktbmybzfxk)<br>
+ [LoRaServer](https://loraserver.digiheart.pt:8080)<br>
 <br>
 
 
