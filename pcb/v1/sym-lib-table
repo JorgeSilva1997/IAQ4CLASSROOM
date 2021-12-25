@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name ESTG_IAQ)(type Legacy)(uri ${KIPRJMOD}/ESTG_IAQ.lib)(options "")(descr ""))
+)
