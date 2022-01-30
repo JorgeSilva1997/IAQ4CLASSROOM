@@ -48,9 +48,9 @@ DHT dht(DHTPIN, DHTTYPE);   // Initialize DHT sensor.
 
 
 /*  LED RGB CONFS   */
-#define LEDR 25   
-#define LEDG 26    
-#define LEDB 27  
+#define LEDR 25             // PINOUT NO PROJ ->    4
+#define LEDG 26             // PINOUT NO PROJ ->    5
+#define LEDB 27             // PINOUT NO PROJ ->    18
 int ledcolor = 0;
 int a = 1000; //this sets how long the stays one color for
 
@@ -96,11 +96,9 @@ int a = 1000; //this sets how long the stays one color for
     //#endif
 
 /*
-
 Tipo de erros:
     -> Má leitura OU Leitura sem sucesso
     -> Não detetar sensor
-
 */
 
 
@@ -242,15 +240,17 @@ void sgpFunc()
 //   }
 
 }
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
 //                                                      END SGP30 PROCESS                                                                   //
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      INIT CREATE DATA PROCESS                                                            //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CreateDados()
 {
     // Inicio da String dados
@@ -271,6 +271,65 @@ void CreateDados()
     // Errors 
     // dados += ("&E1="); dados += (errordht);   // Erro do dht22       ???
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      END CREATE DATA PROCESS                                                             //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      INIT OUTPUT USER PROCESS                                                            //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void AirQual()
+{
+    //  Compare the values to good conditions and show to user 
+        /*
+                Se a humidade for a baixo dos 20% e qualquer temp -> Mau
+                Se a humidade estiver entre os 20 e os 85%:
+                    - Mas a temp abaixo dos 19ºC -> Mau
+                    - Mas se a temp for entre os 19 e os 27ºC -> Bom
+                    - Mas se a temp for acima dos 27ºC -> Mau
+                Se a humidade for acima dos 85% e qualquer temp -> Mau
+        */
+       
+    if (hum < 20.0)
+    {
+        // Acender luz vermelha
+    }
+
+    if (hum > 85.0)
+    {
+        // Acender luz vermelha
+    }
+
+    if (hum >= 20.0 && hum <= 85.0)
+    {
+        if (temp < 19.0)
+        {
+            // Acender luz vermelha
+        }
+        if (temp > 27.0)
+        {
+            // Acender luz vermelha
+        }
+        if (temp >= 19.0 && temp <= 27.0)
+        {
+            // Acender luz verde
+        }
+        
+        
+    }
+    
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      END OUTPUT USER PROCESS                                                             //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 void setup() 
 {
@@ -316,6 +375,7 @@ void setup()
 
 void loop() 
 {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Call dht22 function
     dht22();
@@ -323,16 +383,27 @@ void loop()
         // Dealy between function ( 1sec = 1 000ms )
         delay(1000);
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // Call sgp30 function
-//    sgpFunc();
+    sgpFunc();
 
         // Dealy between function ( 1sec = 1 000ms )
-//        delay(1000);
+       delay(1000);
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Function to create/prepare DADOS
-//    CreateDados();
+    CreateDados();
 
-//    dados.getBytes(mydata, sizeof(mydata)-1);
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Function to show the Air Quality (LED)
+    AirQual();
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    dados.getBytes(mydata, sizeof(mydata)-1);
     // Clear Data
     dados = "";
 
@@ -342,11 +413,9 @@ void loop()
 
 
 /*
-
     O QUE FALTA:
         * Implementar função para o SPS 30;
         * Comunicação LoRa;
         * LED Output;
         * Lógica dos erros;
-
 */
