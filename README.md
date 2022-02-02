@@ -1,4 +1,4 @@
-# IAQ4CLASSROOM 
+<!-- # IAQ4CLASSROOM -->
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
 <!-- ![GitHub open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge) -->
