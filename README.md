@@ -8,21 +8,27 @@
 
 <!-- > IAQ4CLASSROOM  Project -->
 
-### Improvements
+## ✔️ Improvements
 
 The project is still under development and future updates will focus on the following tasks:
 <!-- - [x] Tarefa 1 -->
-- [ ] Task 1 
+<!--- [ ] Task 1 
 - [ ] Task 2
 - [ ] Task 3
-- [ ] Task 4
-- [ ] Task 5
-- [ ] Task 6
-    - [ ] Sub Task
+- [ ] Task 4 -->
+- [ ] Update Firmware
+    - [ ] Implement Errors Function;
+    - [ ] Implement User Output (LED Function);
+    - [ ] Organize and clean de code;
+- [ ] Dashboard
+    - [ ] Implement/Add the other schools;
+    - [ ] Improve User Interface;
+    - [ ] Implement Notifications/Alerts;
+    - [ ] Implement Guest Mode;
 <br>
 
 
-### Devices Info
+## ℹ️ Devices Info
 
 Device: DIAQ03
 
@@ -50,7 +56,7 @@ Device: DIAQ06
 <hr><br>
 
 
-### Useful Links
+## 🌐 Useful Links
 
  [SMART-IPVC Plataform](http://smart.ipvc.pt/projects/)<br>
  [IAQ Dashboard](http://smart.ipvc.pt:4062/#/login)<br>
