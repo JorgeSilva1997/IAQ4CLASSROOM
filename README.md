@@ -18,15 +18,21 @@ The project is still under development and future updates will focus on the foll
 - [ ] Task 2
 - [ ] Task 3
 - [ ] Task 4 -->
-- [ ] Update Firmware
+- [ ] Firmware - New/Update features
     - [ ] Implement Errors Function;
     - [ ] Implement User Output (LED Function);
     - [ ] Organize and clean de code;
-- [ ] Dashboard
+- [ ] Web Aplication - Dashboard
     - [ ] Implement/Add the other schools;
     - [ ] Improve User Interface;
     - [ ] Implement Notifications/Alerts;
     - [ ] Implement Guest Mode;
+- [ ] Testing & Validation
+    - [ ] ...
+    - [ ] ...
+- [ ] Reporting
+    - [ ] ...
+    - [ ] ...
 <br>
 
 
