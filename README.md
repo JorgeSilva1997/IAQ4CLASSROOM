@@ -28,11 +28,10 @@ The project is still under development and future updates will focus on the foll
     - [ ] Implement Notifications/Alerts;
     - [ ] Implement Guest Mode;
 - [ ] Testing & Validation
-    - [ ] ...
-    - [ ] ...
+    - [ ] Testing our prototypes with professional CO2 sensor. Duration 1 or 2 week
+    - [ ] Make a validation using MatLab or Octave to prove the efficiency of our prototypes.
 - [ ] Reporting
-    - [ ] ...
-    - [ ] ...
+    - [ ] Creating a report or article.
 <br>
 
 
