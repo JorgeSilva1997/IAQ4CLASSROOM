@@ -37,8 +37,19 @@ The project is still under development and future updates will focus on the foll
 
 ## ℹ️ Devices Info
 
-Device: DIAQ03
+Device: DIAQ01
+* Device Address: .. .. .. ..
+* NWK Key: .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+* APP Key: .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+<hr>
 
+Device: DIAQ02
+* Device Address: .. .. .. ..
+* NWK Key: .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+* APP Key: .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+<hr>
+
+Device: DIAQ03
 * Device Address: 04 bf 80 aa
 * NWK Key: 46 13 e5 40 bd 5c e0 91 8b 73 0a c0 97 2c 88 38
 * APP Key: 6d f1 a7 ab c9 d6 4d 4b b4 30 69 d1 5a 27 f6 ae
