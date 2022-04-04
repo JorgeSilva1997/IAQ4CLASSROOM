@@ -80,6 +80,7 @@ Device: DIAQ06
  [IAQ Dashboard](http://smart.ipvc.pt:4062/#/login)<br>
  [Technical Report](https://www.overleaf.com/read/kwktbmybzfxk)<br>
  [LoRaServer](https://loraserver.digiheart.pt:8080)<br>
+ [New Web Application - Test Version](http://161.230.15.64:5015/)<br>
 <br>
 
 
