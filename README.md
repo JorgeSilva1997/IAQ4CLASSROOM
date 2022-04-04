@@ -25,8 +25,9 @@ The project is still under development and future updates will focus on the foll
 - [ ] Web Aplication - Dashboard
     - [ ] Implement/Add the other schools;
     - [ ] Improve User Interface;
-    - [ ] Implement Notifications/Alerts;
-    - [ ] Implement Guest Mode;
+    - [ ] Implement/Add Notifications/Alerts;
+    - [ ] Implement/Add Admin Mode;
+    - [ ] Implement/Add Guest Mode;
 - [ ] Testing & Validation
     - [ ] Testing our prototypes with professional CO2 sensor. Duration 1 or 2 week
     - [ ] Make a validation using MatLab or Octave to prove the efficiency of our prototypes.
@@ -81,6 +82,7 @@ Device: DIAQ06
  [Technical Report](https://www.overleaf.com/read/kwktbmybzfxk)<br>
  [LoRaServer](https://loraserver.digiheart.pt:8080)<br>
  [New Web Application - Test Version](http://161.230.15.64:5015/)<br>
+ [New Article About The Project](https://www.google.com/)<br>
 <br>
 
 
