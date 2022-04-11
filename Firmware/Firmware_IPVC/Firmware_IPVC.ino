@@ -31,13 +31,13 @@ SPS30 sps30;
  * 1 : request sending and receiving
  * 2 : request sending and receiving + show protocol errors */
  //////////////////////////////////////////////////////////////
-#define DEBUG 2
+#define DEBUG 2 // Código original estava a 0 
 // function prototypes (sometimes the pre-processor does not create prototypes themself on ESPxx)
 void serialTrigger(char * mess);
 void ErrtoMess(char *mess, uint8_t r);
 void Errorloop(char *mess, uint8_t r);
-void GetDeviceInfo();
-bool read_all();
+void GetDeviceInfoSps30();
+bool spsFunc();
 
 
 /*  DHT22 CONFS */
@@ -106,8 +106,6 @@ int a = 1000; //this sets how long the stays one color for
 
     // State machine event handler
 void onEvent (ev_t ev) {
-//   Serial.print(os_getTime());
-//   Serial.print(": ");
   switch (ev) {
     case EV_SCAN_TIMEOUT:
       Serial.println(F("EV_SCAN_TIMEOUT"));
@@ -172,9 +170,6 @@ void onEvent (ev_t ev) {
       break;
   }
 }
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
@@ -374,14 +369,11 @@ void AirQual()
                     - Mas se a temp for entre os 19 e os 27ºC -> Bom
                     - Mas se a temp for acima dos 27ºC -> Mau
                 Se a humidade for acima dos 85% e qualquer temp -> Mau
-
             Nós lemos as PM1 , PM2.5 e PM10 e TVOC
             Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
             Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
             Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
             Se PM2.5 >= 55.5 && PM10 >= 255 && TVOC > 0.5 -> UNHEALTHY                                          (RED)
-
-
                 ATENÇÃO !!! FALTA A PARTE DAS PARTÍCULAS E DO CO2 (https://www.ebay.com/itm/112691626960?mkevt=1&siteid=1&mkcid=2&mkrid=711-153320-877651-5&source_name=google&mktype=pla_ssc&campaignid=11826484955&groupid=114180021839&targeted=pla-293946777986&MT_ID=&adpos=&device=c&googleloc=1011776&itemid=112691626960&merchantid=116792603&geo_id=164&gclid=EAIaIQobChMIte_IhKba9QIViQUGAB0nfQFtEAYYAyABEgIPf_D_BwE)
         */
 
@@ -403,11 +395,11 @@ void AirQual()
     {
         if (temp < 19.0)
         {
-            // Acender luz vermelha
+            // Acender luz amarela
         }
         if (temp > 27.0)
         {
-            // Acender luz vermelha
+            // Acender luz amarela
         }
         if (temp >= 19.0 && temp <= 27.0)
         {
@@ -477,9 +469,205 @@ void do_send(osjob_t* j) {
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       INIT SPS30 PROCESS                                                                   //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+void GetDeviceInfoSps30()
+{
+  char buf[32];
+  uint8_t ret;
+  SPS30_version v;
+
+  //try to read serial number
+  ret = sps30.GetSerialNumber(buf, 32);
+  if (ret == ERR_OK) {
+    Serial.print(F("Serial number : "));
+    if(strlen(buf) > 0)  Serial.println(buf);
+    else Serial.println(F("not available"));
+  }
+  else
+    ErrtoMess((char *) "could not get serial number", ret);
+
+  // try to get product name
+  ret = sps30.GetProductName(buf, 32);
+  if (ret == ERR_OK)  {
+    Serial.print(F("Product name  : "));
+
+    if(strlen(buf) > 0)  Serial.println(buf);
+    else Serial.println(F("not available"));
+  }
+  else
+    ErrtoMess((char *) "could not get product name.", ret);
+
+  // try to get version info
+  ret = sps30.GetVersion(&v);
+  if (ret != ERR_OK) {
+    Serial.println(F("Can not read version info"));
+    return;
+  }
+
+  Serial.print(F("Firmware level: "));  Serial.print(v.major);
+  Serial.print("."); Serial.println(v.minor);
+
+  if (SPS30_COMMS != I2C_COMMS) {
+    Serial.print(F("Hardware level: ")); Serial.println(v.HW_version);
+
+    Serial.print(F("SHDLC protocol: ")); Serial.print(v.SHDLC_major);
+    Serial.print("."); Serial.println(v.SHDLC_minor);
+  }
+
+  Serial.print(F("Library level : "));  Serial.print(v.DRV_major);
+  Serial.print(".");  Serial.println(v.DRV_minor);
+}
+
+/**
+ * @brief : read and display all values
+ */
+bool spsFunc()
+{
+  static bool header = true;
+  uint8_t ret, error_cnt = 0;
+  struct sps_values val;
+
+  // loop to get data
+  do {
+
+    ret = sps30.GetValues(&val);
+
+    // data might not have been ready
+    if (ret == ERR_DATALENGTH){
+
+        if (error_cnt++ > 3) {
+          ErrtoMess((char *) "Error during reading values: ",ret);
+          return(false);
+        }
+        delay(1000);
+    }
+
+    // if other error
+    else if(ret != ERR_OK) {
+      ErrtoMess((char *) "Error during reading values: ",ret);
+      return(false);
+    }
+
+  } while (ret != ERR_OK);
+
+  // only print header first time
+  if (header) {
+    Serial.println(F("-------------Mass -----------    ------------- Number --------------   -Average-"));
+    Serial.println(F("     Concentration [μg/m3]             Concentration [#/cm3]             [μm]"));
+    Serial.println(F("P1.0\tP2.5\tP4.0\tP10\tP0.5\tP1.0\tP2.5\tP4.0\tP10\tPartSize\n"));
+    header = false;
+  }
+ 
+  Serial.print(val.MassPM1);
+  dados += ("&a="); dados+= (val.MassPM1);
+  Serial.print(F("\t"));
+  Serial.print(val.MassPM2);
+  dados += ("&b="); dados+= (val.MassPM2);
+  Serial.print(F("\t"));
+  Serial.print(val.MassPM4);
+  Serial.print(F("\t"));
+  Serial.print(val.MassPM10);
+  dados += ("&c="); dados+= (val.MassPM10);
+  Serial.print(F("\t"));
+  Serial.print(val.NumPM0);
+  Serial.print(F("\t"));
+  Serial.print(val.NumPM1);
+  Serial.print(F("\t"));
+  Serial.print(val.NumPM2);
+  Serial.print(F("\t"));
+  Serial.print(val.NumPM4);
+  Serial.print(F("\t"));
+  Serial.print(val.NumPM10);
+  Serial.print(F("\t"));
+  Serial.print(val.PartSize);
+  Serial.print(F("\n"));
+
+  return(true);
+}
+
+/**
+ *  @brief : continued loop after fatal error
+ *  @param mess : message to display
+ *  @param r : error code
+ *
+ *  if r is zero, it will only display the message
+ */
+void Errorloop(char *mess, uint8_t r)
+{
+  if (r) ErrtoMess(mess, r);
+  else Serial.println(mess);
+  Serial.println(F("Program on hold"));
+  for(;;) delay(100000);
+}
+
+/**
+ *  @brief : display error message
+ *  @param mess : message to display
+ *  @param r : error code
+ *
+ */
+void ErrtoMess(char *mess, uint8_t r)
+{
+  char buf[80];
+
+  Serial.print(mess);
+
+  sps30.GetErrDescription(r, buf, 80);
+  Serial.println(buf);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       END SPS30 PROCESS                                                                   //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 void setup() 
 {
   Serial.begin(9600);
+
+  /*
+
+      SPS30 SETUP
+
+  */
+  sps30.EnableDebugging(DEBUG);
+
+  // set pins to use for softserial and Serial1 on ESP32
+  if (TX_PIN != 0 && RX_PIN != 0) sps30.SetSerialPin(RX_PIN,TX_PIN);
+
+  // Begin communication channel;
+  if (! sps30.begin(SPS30_COMMS))
+    Errorloop((char *) "could not initialize communication channel.", 0);
+
+  // check for SPS30 connection
+  if (! sps30.probe()) Errorloop((char *) "could not probe / connect with SPS30.", 0);
+  else  Serial.println(F("Detected SPS30."));
+
+  // reset SPS30 connection
+  if (! sps30.reset()) Errorloop((char *) "could not reset.", 0);
+
+  // read device info
+  GetDeviceInfoSps30();
+
+  // start measurement
+  if (sps30.start()) Serial.println(F("Measurement started"));
+  else Errorloop((char *) "Could NOT start measurement", 0);
+
+  //serialTrigger((char *) "Hit <enter> to continue reading");
+
+  if (SPS30_COMMS == I2C_COMMS) {
+    if (sps30.I2C_expect() == 4)
+      Serial.println(F(" !!! Due to I2C buffersize only the SPS30 MASS concentration is available !!! \n"));
+  }
 
   // Initialize the digital pin as an output 
   pinMode(LEDR, OUTPUT);
@@ -574,8 +762,8 @@ void loop()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Call sgs30 function
-    spsFunc();  // Por definir
+    // Call sps30 function
+    spsFunc();  
 
         // Dealy between function ( 1sec = 1 000ms )
        delay(1000);
@@ -604,7 +792,6 @@ void loop()
 
 /*
     O QUE FALTA:
-        * Implementar função para o SPS 30;
         * Comunicação LoRa;                         (Feito mas falta testar!)
         * LED Output;
         * Lógica dos erros;
