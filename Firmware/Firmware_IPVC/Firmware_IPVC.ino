@@ -68,13 +68,24 @@ int a = 1000; //this sets how long the stays one color for
     String tvoc, eco2;
     int cntsgp=0;
 
+    // For SPS 30
+    String ValuePM1, ValuePM2, ValuePM10;  
+
     // Errors Part | If value = 1 -> Error in Sensor
     int error_dht = 0,
         error_sgp = 0, 
         error_sps = 0;
 
-
-
+    // Cor do Led
+        /*
+        0 : Azul - Default
+        1 : Amarelo - MODERATE
+        2 : Laranja - UNHEALTHY FOR SENTIVE GROUP
+        3 : Vermelho - UNHEALTHY
+        4 : Verde - GOOD
+        */
+    int LedColour = 0;
+    
 
 /*  LoRaWAN */
 
@@ -313,169 +324,12 @@ void sgpFunc()
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                                          //
-//                                                      INIT CREATE DATA PROCESS                                                            //
-//                                                                                                                                          //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void CreateDados()
-{
-    // Inicio da String dados
-    dados += ("ID="); dados += (MY_ID);
-
-    // Add Temperature
-    dados += ("&T="); dados += (temp); 
-
-    // Add Humidity
-    dados += ("&H="); dados += (hum); 
-
-    // Add TVOC
-    dados += ("&t="); dados += (tvoc); 
-
-    // Add eCO2
-    dados += ("&CO2="); dados += (eco2); 
-    
-    /*
-        Errors Part
-    */
-   
-      // DHT22 Part
-    if(error_dht != 0)
-    {
-      dados += ("&ErDht="); dados += (error_dht);   // Erro do dht22 
-    }
-      // SPS Part
-      // SGP Part
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                                          //
-//                                                      END CREATE DATA PROCESS                                                             //
-//                                                                                                                                          //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
-//                                                      INIT OUTPUT USER PROCESS                                                            //
+//                                                       INIT SPS30 PROCESS                                                                 //
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AirQual()
-{
-    //  Compare the values to good conditions and show to user 
-        /*
-                Se a humidade for a baixo dos 20% e qualquer temp -> Mau
-                Se a humidade estiver entre os 20 e os 85%:
-                    - Mas a temp abaixo dos 19ºC -> Mau
-                    - Mas se a temp for entre os 19 e os 27ºC -> Bom
-                    - Mas se a temp for acima dos 27ºC -> Mau
-                Se a humidade for acima dos 85% e qualquer temp -> Mau
-            Nós lemos as PM1 , PM2.5 e PM10 e TVOC
-            Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
-            Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
-            Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
-            Se PM2.5 >= 55.5 && PM10 >= 255 && TVOC > 0.5 -> UNHEALTHY                                          (RED)
-                ATENÇÃO !!! FALTA A PARTE DAS PARTÍCULAS E DO CO2 (https://www.ebay.com/itm/112691626960?mkevt=1&siteid=1&mkcid=2&mkrid=711-153320-877651-5&source_name=google&mktype=pla_ssc&campaignid=11826484955&groupid=114180021839&targeted=pla-293946777986&MT_ID=&adpos=&device=c&googleloc=1011776&itemid=112691626960&merchantid=116792603&geo_id=164&gclid=EAIaIQobChMIte_IhKba9QIViQUGAB0nfQFtEAYYAyABEgIPf_D_BwE)
-        */
-
-       // String to float 
-       float tvocF = 0.0;
-       tvocF = tvoc.toFloat();
-
-    if (hum < 20.0)
-    {
-        // Acender luz vermelha
-    }
-
-    if (hum > 85.0)
-    {
-        // Acender luz vermelha
-    }
-
-    if (hum >= 20.0 && hum <= 85.0)
-    {
-        if (temp < 19.0)
-        {
-            // Acender luz amarela
-        }
-        if (temp > 27.0)
-        {
-            // Acender luz amarela
-        }
-        if (temp >= 19.0 && temp <= 27.0)
-        {
-/*
-    val.MassPM2 -> Meter isto numa variavel global quando for lida (agora vou chamar-lhe de pm25)
-    val.MassPM10 -> Meter isto numa variavel global quando for lida (agora vou chamar-lhe de pm10)
-*/
-            // CASO 1 - GOOD
-            // Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
-            if ((pm25 >= 0.0 && pm25 =< 12.0) && (pm10 >= 0 && pm10 =< 54) && (tvocF =< 0.5))
-            {
-                // Acender led com cor verde
-            }
-
-            // CASO 2 - MODERATE
-            // Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
-            if ((pm25 >= 12.1 && pm25 =< 35.4) && (pm10 >= 55 && pm10 =< 154) && (tvocF > 0.5))
-            {
-                // Acender led com cor amarela
-            }
-
-            // CASO 3 - UNHEALTHY FOR SENTIVE GROUP
-            // Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
-            if ((pm25 >= 35.5 && pm25 =< 55.4) && (pm10 >= 155 && pm10 =< 254) && (tvocF > 0.5))
-            {
-                // Acender led com cor laranja
-            }
-
-            // CASO 4 - UNHEALTHY
-            // Se PM2.5 >= 55.5 && PM10 >= 255 && TVOC > 0.5 -> UNHEALTHY                                          (RED)
-            if ((pm25 >= 55.5) && (pm10 >= 255) && (tvocF > 0.5))
-            {
-                // Acender led com cor vermelha
-            }
-            
-        }
-    }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                                          //
-//                                                      END OUTPUT USER PROCESS                                                             //
-//                                                                                                                                          //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                                          //
-//                                                      INIT LORA PROCESS                                                                   //
-//                                                                                                                                          //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Transmit data from mydata
-void do_send(osjob_t* j) {
-  // Check if there is not a current TX/RX job running
-  if (LMIC.opmode & OP_TXRXPEND) {
-    Serial.println(F("OP_TXRXPEND, not sending"));
-  } else {
-    // digitalWrite(LED_BUILTIN, HIGH); // Turn on LED while sending
-    // Prepare upstream data transmission at the next possible time.
-    LMIC_setTxData2(1, mydata, sizeof(mydata) - 1, 0);
-    Serial.println(F("Packet queued"));
-  }
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                                          //
-//                                                       END LORA PROCESS                                                                   //
-//                                                                                                                                          //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                                          //
-//                                                       INIT SPS30 PROCESS                                                                   //
-//                                                                                                                                          //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 void GetDeviceInfoSps30()
 {
@@ -563,18 +417,21 @@ bool spsFunc()
     Serial.println(F("     Concentration [μg/m3]             Concentration [#/cm3]             [μm]"));
     Serial.println(F("P1.0\tP2.5\tP4.0\tP10\tP0.5\tP1.0\tP2.5\tP4.0\tP10\tPartSize\n"));
     header = false;
-  }
- 
+  } 
+
   Serial.print(val.MassPM1);
-  dados += ("&a="); dados+= (val.MassPM1);
+  ValuePM1 = val.MassPM1;
+  //dados += ("&a="); dados+= (val.MassPM1);
   Serial.print(F("\t"));
   Serial.print(val.MassPM2);
-  dados += ("&b="); dados+= (val.MassPM2);
+  ValuePM2 = val.MassPM2;
+  //dados += ("&b="); dados+= (val.MassPM2);
   Serial.print(F("\t"));
   Serial.print(val.MassPM4);
   Serial.print(F("\t"));
   Serial.print(val.MassPM10);
-  dados += ("&c="); dados+= (val.MassPM10);
+  ValuePM10 = val.MassPM10;
+  //dados += ("&c="); dados+= (val.MassPM10);
   Serial.print(F("\t"));
   Serial.print(val.NumPM0);
   Serial.print(F("\t"));
@@ -603,8 +460,9 @@ void Errorloop(char *mess, uint8_t r)
 {
   if (r) ErrtoMess(mess, r);
   else Serial.println(mess);
+  // Comentar os dois comandos abaixo
   Serial.println(F("Program on hold"));
-  for(;;) delay(100000);
+  for(;;) delay(100000);                        // Este é o problema de quando não há SPS30, o firmware deixa de funcionar !!!!  
 }
 
 /**
@@ -625,7 +483,205 @@ void ErrtoMess(char *mess, uint8_t r)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
-//                                                       END SPS30 PROCESS                                                                   //
+//                                                       END SPS30 PROCESS                                                                  //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      INIT CREATE DATA PROCESS                                                            //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void CreateDados()
+{
+    // Inicio da String dados
+    dados += ("ID="); dados += (MY_ID);
+
+    // Add Temperature
+    dados += ("&T="); dados += (temp); 
+
+    // Add Humidity
+    dados += ("&H="); dados += (hum); 
+
+    // Add TVOC
+    dados += ("&t="); dados += (tvoc); 
+
+    // Add eCO2
+    dados += ("&CO2="); dados += (eco2); 
+    
+    // Add PM 1.0
+    dados += ("&a="); dados+= (ValuePM1);
+
+    // Add PM 2.5
+    dados += ("&b="); dados+= (ValuePM2);
+
+    // Add PM 10.0
+    dados += ("&c="); dados+= (ValuePM10);
+
+    // Add Colour LED
+    dados += ("&l="); dados+= (LedColour);
+    
+    /*
+        Errors Part
+    */
+   
+      // DHT22 Part
+    if(error_dht != 0)
+    {
+      dados += ("&ErDht="); dados += (error_dht);   // Erro do dht22 
+    }
+      // SPS Part
+      // SGP Part
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      END CREATE DATA PROCESS                                                             //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      INIT OUTPUT USER PROCESS                                                            //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void AirQual()
+{
+    //  Compare the values to good conditions and show to user 
+        /*
+                Se a humidade for a baixo dos 20% e qualquer temp -> Mau
+                Se a humidade estiver entre os 20 e os 85%:
+                    - Mas a temp abaixo dos 19ºC -> Mau
+                    - Mas se a temp for entre os 19 e os 27ºC -> Bom
+                    - Mas se a temp for acima dos 27ºC -> Mau
+                Se a humidade for acima dos 85% e qualquer temp -> Mau
+            Nós lemos as PM1 , PM2.5 e PM10 e TVOC
+            Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
+            Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
+            Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
+            Se PM2.5 >= 55.5 && PM10 >= 255 && TVOC > 0.5 -> UNHEALTHY                                          (RED)
+                ATENÇÃO !!! FALTA A PARTE DO CO2 (https://www.ebay.com/itm/112691626960?mkevt=1&siteid=1&mkcid=2&mkrid=711-153320-877651-5&source_name=google&mktype=pla_ssc&campaignid=11826484955&groupid=114180021839&targeted=pla-293946777986&MT_ID=&adpos=&device=c&googleloc=1011776&itemid=112691626960&merchantid=116792603&geo_id=164&gclid=EAIaIQobChMIte_IhKba9QIViQUGAB0nfQFtEAYYAyABEgIPf_D_BwE)
+        */
+
+       /*
+        0 : Azul - Default
+        1 : Amarelo - MODERATE
+        2 : Laranja - UNHEALTHY FOR SENTIVE GROUP
+        3 : Vermelho - UNHEALTHY
+        4 : Verde - GOOD
+        */
+
+       // String to float 
+       float tvocF = 0.0, pm2 = 0.0, pm10 = 0.0;
+       tvocF = tvoc.toFloat();
+       pm2 = ValuePM2.toFloat();
+       pm10 = ValuePM10.toFloat();
+
+    if (hum < 20.0)
+    {
+        // Acender luz vermelha
+
+        // Alterar a variavel LedColour para a cor vermelha
+        LedColour = 3;
+    }
+
+    if (hum > 85.0)
+    {
+        // Acender luz vermelha
+
+        // Alterar a variavel LedColour para a cor vermelha
+        LedColour = 3;
+    }
+
+    if (hum >= 20.0 && hum <= 85.0)
+    {
+        if (temp < 19.0)
+        {
+            // Acender luz amarela
+
+            // Alterar a variavel LedColour para a cor amarela
+            LedColour = 1;
+        }
+        if (temp > 27.0)
+        {
+            // Acender luz amarela
+
+            // Alterar a variavel LedColour para a cor amarela
+            LedColour = 1;
+        }
+        if (temp >= 19.0 && temp <= 27.0)
+        {
+            // CASO 1 - GOOD
+            // Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
+            if ((pm2 >= 0.0 && pm2 =< 12.0) && (pm10 >= 0 && pm10 =< 54) && (tvocF =< 0.5))
+            {
+                // Acender led com cor verde
+
+                // Alterar a variavel LedColour para a cor verde
+                LedColour = 4;
+            }
+
+            // CASO 2 - MODERATE
+            // Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
+            if ((pm2 >= 12.1 && pm2 =< 35.4) && (pm10 >= 55 && pm10 =< 154) && (tvocF > 0.5))
+            {
+                // Acender led com cor amarela
+
+                // Alterar a variavel LedColour para a cor amarela
+                LedColour = 1;
+            }
+
+            // CASO 3 - UNHEALTHY FOR SENTIVE GROUP
+            // Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
+            if ((pm2 >= 35.5 && pm2 =< 55.4) && (pm10 >= 155 && pm10 =< 254) && (tvocF > 0.5))
+            {
+                // Acender led com cor laranja
+
+                // Alterar a variavel LedColour para a cor laranja
+                LedColour = 2;
+            }
+
+            // CASO 4 - UNHEALTHY
+            // Se PM2.5 >= 55.5 && PM10 >= 255 && TVOC > 0.5 -> UNHEALTHY                                          (RED)
+            if ((pm2 >= 55.5) && (pm10 >= 255) && (tvocF > 0.5))
+            {
+                // Acender led com cor vermelha
+
+                // Alterar a variavel LedColour para a cor vermelha
+                LedColour = 3;
+            }
+            
+        }
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      END OUTPUT USER PROCESS                                                             //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                      INIT LORA PROCESS                                                                   //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Transmit data from mydata
+void do_send(osjob_t* j) {
+  // Check if there is not a current TX/RX job running
+  if (LMIC.opmode & OP_TXRXPEND) {
+    Serial.println(F("OP_TXRXPEND, not sending"));
+  } else {
+    // digitalWrite(LED_BUILTIN, HIGH); // Turn on LED while sending
+    // Prepare upstream data transmission at the next possible time.
+    LMIC_setTxData2(1, mydata, sizeof(mydata) - 1, 0);
+    Serial.println(F("Packet queued"));
+  }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       END LORA PROCESS                                                                   //
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
