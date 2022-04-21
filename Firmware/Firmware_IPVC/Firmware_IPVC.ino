@@ -1,52 +1,52 @@
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-//                         Firmware - IAQ4CLASSROOM                             //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-// -> Sensores usados:                                                          //
-//                                                                              //
-//    * DHT22 - Sensor com o objetivo de recolher os dados referentes à         //
-//              temperatura e humidade na sala de aula.                         //
-//    * SPS30 - Sensor com o objetivo de recolher os dados referentes às        //
-//              particulas de diversos diâmetros presentes no ar.               //
-//    * SGP30 - Sensor que é capaz de medir os componentes orgánicos            //
-//              voláteis (TVOC) sendo também capaz de medir os valores de eCO2  //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-// -> Tecnologias usadas:                                                       //
-//                                                                              //
-//    * LoRaWAN - Comunicação dos dados recolhidos pelos sensores.              //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-// -> Descrição/Objetivo:                                                       //
-//                                                                              //
-//    * Projeto com o intuito de medir a qualidade do ar no interior            //
-//      das saulas de aulo com recurso a diversos sensores                      //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-// -> Autores:                                                                  //
-//                                                                              //
-//    * Jorge Manuel Silva -                                                    //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-// -> Colaboradores:                                                            //
-//                                                                              //
-//    * Sérgio I. Lopes -                                                       //
-//    * Emmanuel Lomba -                                                        //
-//    * António Abreu -                                                         //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
-//                                                                              //
-// -> Last Firmware Update:                                                     //
-//                                                                              //
-//    * 21/04/2022                                                              //
-//                                                                              //
-//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+//                            Firmware - IAQ4CLASSROOM                                  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// -> Sensores usados:                                                                  //
+//                                                                                      //
+//    * DHT22 - Sensor com o objetivo de recolher os dados referentes à                 //
+//              temperatura e humidade na sala de aula.                                 //
+//    * SPS30 - Sensor com o objetivo de recolher os dados referentes às                //
+//              particulas de diversos diâmetros presentes no ar.                       //
+//    * SGP30 - Sensor que é capaz de medir os componentes orgánicos                    //
+//              voláteis (TVOC) sendo também capaz de medir os valores de eCO2          //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// -> Tecnologias usadas:                                                               //
+//                                                                                      //
+//    * LoRaWAN - Comunicação dos dados recolhidos pelos sensores.                      //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// -> Descrição/Objetivo:                                                               //
+//                                                                                      //
+//    * Projeto com o intuito de medir a qualidade do ar no interior                    //
+//      das saulas de aulo com recurso a diversos sensores                              //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// -> Autores:                                                                          //
+//                                                                                      //
+//    * Jorge Manuel Silva - https://www.linkedin.com/in/jorge-manuel-silva-386567217/  //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// -> Colaboradores:                                                                    //
+//                                                                                      //
+//    * Sérgio I. Lopes - https://www.linkedin.com/in/sergioivan/                       //
+//    * Emmanuel Lomba -                                                                //
+//    * António Abreu - https://www.linkedin.com/in/antonio-abreu-a93433145/            //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// -> Last Firmware Update:                                                             //
+//                                                                                      //
+//    * 21/04/2022                                                                      //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
 
 
 #include <lmic.h>
