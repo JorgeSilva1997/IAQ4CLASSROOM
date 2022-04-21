@@ -1,6 +1,53 @@
-//
-//  Firmware
-//
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+//                         Firmware - IAQ4CLASSROOM                             //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// -> Sensores usados:                                                          //
+//                                                                              //
+//    * DHT22 - Sensor com o objetivo de recolher os dados referentes à         //
+//              temperatura e humidade na sala de aula.                         //
+//    * SPS30 - Sensor com o objetivo de recolher os dados referentes às        //
+//              particulas de diversos diâmetros presentes no ar.               //
+//    * SGP30 - Sensor que é capaz de medir os componentes orgánicos            //
+//              voláteis (TVOC) sendo também capaz de medir os valores de eCO2  //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// -> Tecnologias usadas:                                                       //
+//                                                                              //
+//    * LoRaWAN - Comunicação dos dados recolhidos pelos sensores.              //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// -> Descrição/Objetivo:                                                       //
+//                                                                              //
+//    * Projeto com o intuito de medir a qualidade do ar no interior            //
+//      das saulas de aulo com recurso a diversos sensores                      //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// -> Autores:                                                                  //
+//                                                                              //
+//    * Jorge Manuel Silva -                                                    //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// -> Colaboradores:                                                            //
+//                                                                              //
+//    * Sérgio I. Lopes -                                                       //
+//    * Emmanuel Lomba -                                                        //
+//    * António Abreu -                                                         //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+//                                                                              //
+// -> Last Firmware Update:                                                     //
+//                                                                              //
+//    * 21/04/2022                                                              //
+//                                                                              //
+//////////////////////////////////////////////////////////////////////////////////
+
 
 #include <lmic.h>
 #include <hal/hal.h>
@@ -48,9 +95,9 @@ DHT dht(DHTPIN, DHTTYPE);   // Initialize DHT sensor.
 
 
 /*  LED RGB CONFS   */
-#define LEDR 25             // PINOUT NO PROJ ->    4
-#define LEDG 26             // PINOUT NO PROJ ->    5
-#define LEDB 27             // PINOUT NO PROJ ->    18
+#define LEDR 4        // PINOUT NO PROJ ->    4
+#define LEDG 5        // PINOUT NO PROJ ->    5
+#define LEDB 18       // PINOUT NO PROJ ->    18
 int ledcolor = 0;
 int a = 1000; //this sets how long the stays one color for
 
@@ -263,24 +310,25 @@ void ErrorSGP()
         if (!sgp.IAQmeasure()) {
             // Incrementa o contador e tenta ler os valores outra vez
             cntsgp++;
-            //Serial.println("Measurement failed");
+            Serial.println(F("Measurement failed..."));
             sgpFunc();
-            //return;
         }
         else
         {
             // Se ler corretamente os valores mete o contador a ZERO 
-            cntsgp=0;
-            //dht22();
+            cntsgp = 0;
+            error_sgp = 0;
         }
     }
     else
     {
         // Sensor já excedeu as tentivas de erro | Avisar USER (PISCAR LED) | Enviar mensagem de erro para Dash 
+
             // Printar na console 
             Serial.println(F("Failed to read from SGP30 sensor!"));
-            // Init LED 
-                // !!! FALTA !!!
+
+            // Adicionar report do erro à string de dados
+            error_sgp = 1;
             
         // Voltar a meter a variavel do contador a ZERO
         cntsgp = 0;
@@ -290,13 +338,9 @@ void ErrorSGP()
 /*  SGP30 FUNCTION  */
 void sgpFunc()
 {
-    // if (! sgp.IAQmeasure()) 
-    // {
-    //     Serial.println("Measurement failed");
-    //     return;
-    // }
     // Check Erros
     ErrorSGP();
+
     // Copia para as variaveis globais o valor lido
     tvoc = sgp.TVOC;
     eco2 = sgp.eCO2;
@@ -525,13 +569,22 @@ void CreateDados()
         Errors Part
     */
    
-      // DHT22 Part
+    // DHT22 Part - Caso o valor da váriavel seja diferente de zero é enviado o valor da mesma
     if(error_dht != 0)
     {
       dados += ("&ErDht="); dados += (error_dht);   // Erro do dht22 
     }
-      // SPS Part
-      // SGP Part
+    // SPS30 Part - Caso o valor da váriavel seja diferente de zero é enviado o valor da mesma
+    if(error_sps != 0)
+    {
+      dados += ("&ErSps="); dados += (error_sps);   // Erro do SPS30
+    } 
+
+    // SGP30 Part - Caso o valor da váriavel seja diferente de zero é enviado o valor da mesma
+    if(error_sgp != 0)
+    {
+      dados += ("&ErSgp="); dados += (error_sgp);   // Erro do SGP30 
+    }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
@@ -545,6 +598,22 @@ void CreateDados()
 //                                                      INIT OUTPUT USER PROCESS                                                            //
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////
+    //                                        //
+    //   Função para atribuir a cor ao LED    //
+    //                                        //
+    ////////////////////////////////////////////
+
+void setColor(int R, int G, int B) {
+  // #define LEDR 4        
+  // #define LEDG 5      
+  // #define LEDB 18       
+  analogWrite(LEDR, R);
+  analogWrite(LEDG, G);
+  analogWrite(LEDB, B);
+}
+
 void AirQual()
 {
     //  Compare the values to good conditions and show to user 
@@ -565,10 +634,20 @@ void AirQual()
 
        /*
         0 : Azul - Default
+          // color code #0000FF (R = 0,  G = 0, B = 255)
+          // setColor(0, 0, 255);
         1 : Amarelo - MODERATE
+          // color code #FBFF00 (R = 251,  G = 255, B = 0)
+          // setColor(251, 255, 0);
         2 : Laranja - UNHEALTHY FOR SENTIVE GROUP
+          // color code #FFAA00 (R = 255,  G = 170, B = 0)
+          // setColor(255, 170, 0);
         3 : Vermelho - UNHEALTHY
+          // color code #FFAA00 (R = 255,  G = 0, B = 0)
+          // setColor(255, 0, 0);
         4 : Verde - GOOD
+          // color code #FFAA00 (R = 0,  G = 255, B = 0)
+          // setColor(0, 255, 0);
         */
 
        // String to float 
@@ -580,6 +659,7 @@ void AirQual()
     if (hum < 20.0)
     {
         // Acender luz vermelha
+        setColor(255, 0, 0);
 
         // Alterar a variavel LedColour para a cor vermelha
         LedColour = 3;
@@ -588,6 +668,7 @@ void AirQual()
     if (hum > 85.0)
     {
         // Acender luz vermelha
+        setColor(255, 0, 0);
 
         // Alterar a variavel LedColour para a cor vermelha
         LedColour = 3;
@@ -598,6 +679,7 @@ void AirQual()
         if (temp < 19.0)
         {
             // Acender luz amarela
+            setColor(251, 255, 0);
 
             // Alterar a variavel LedColour para a cor amarela
             LedColour = 1;
@@ -605,6 +687,7 @@ void AirQual()
         if (temp > 27.0)
         {
             // Acender luz amarela
+            setColor(251, 255, 0);
 
             // Alterar a variavel LedColour para a cor amarela
             LedColour = 1;
@@ -616,6 +699,7 @@ void AirQual()
             if ((pm2 >= 0.0 && pm2 =< 12.0) && (pm10 >= 0 && pm10 =< 54) && (tvocF =< 0.5))
             {
                 // Acender led com cor verde
+                setColor(0, 255, 0);
 
                 // Alterar a variavel LedColour para a cor verde
                 LedColour = 4;
@@ -626,6 +710,7 @@ void AirQual()
             if ((pm2 >= 12.1 && pm2 =< 35.4) && (pm10 >= 55 && pm10 =< 154) && (tvocF > 0.5))
             {
                 // Acender led com cor amarela
+                setColor(251, 255, 0);
 
                 // Alterar a variavel LedColour para a cor amarela
                 LedColour = 1;
@@ -636,6 +721,7 @@ void AirQual()
             if ((pm2 >= 35.5 && pm2 =< 55.4) && (pm10 >= 155 && pm10 =< 254) && (tvocF > 0.5))
             {
                 // Acender led com cor laranja
+                setColor(255, 170, 0);
 
                 // Alterar a variavel LedColour para a cor laranja
                 LedColour = 2;
@@ -646,6 +732,7 @@ void AirQual()
             if ((pm2 >= 55.5) && (pm10 >= 255) && (tvocF > 0.5))
             {
                 // Acender led com cor vermelha
+                setColor(255, 0, 0);
 
                 // Alterar a variavel LedColour para a cor vermelha
                 LedColour = 3;
@@ -849,6 +936,9 @@ void loop()
 /*
     O QUE FALTA:
         * Comunicação LoRa;                         (Feito mas falta testar!)
-        * LED Output;
-        * Lógica dos erros;
+        * LED Output;                               (Feito mas falta testar!)
+        * Lógica dos erros;                         (Feito mas falta testar!)
+
+    Falta a atribuição dos erros no Sensor SPS30, pois tem diversos erros que podem acontecer.
+      Ideia - Passar um INT com o valor do erro e no lado do Server ver qual o valor desse erro e imprimir o erro na Aplicação Web !!!
 */
