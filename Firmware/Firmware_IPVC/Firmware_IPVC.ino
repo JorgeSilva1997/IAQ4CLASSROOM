@@ -44,7 +44,7 @@
 //                                                                                      //
 // -> Last Firmware Update:                                                             //
 //                                                                                      //
-//    * 21/04/2022                                                                      //
+//    * 22/04/2022                                                                      //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,11 +53,9 @@
 #include <hal/hal.h>
 #include <SPI.h>
 #include <DHT.h>
-//#include <DHT_U.h>
 #include <Wire.h>
 #include "Adafruit_SGP30.h"
 #include "sps30.h"
-
 
 
 // create constructor
@@ -100,6 +98,7 @@ DHT dht(DHTPIN, DHTTYPE);   // Initialize DHT sensor.
 #define LEDB 18       // PINOUT NO PROJ ->    18
 int ledcolor = 0;
 int a = 1000; //this sets how long the stays one color for
+String ColorToText = "";
 
 
 /*  Variaveis Globais   */
@@ -122,6 +121,7 @@ int a = 1000; //this sets how long the stays one color for
     int error_dht = 0,
         error_sgp = 0, 
         error_sps = 0;
+    String MessageError = "";
 
     // Cor do Led
         /*
@@ -284,7 +284,7 @@ void dht22()
     ErrorDHT(temp, hum);
 
     // PRINT IN CONSOLE RESULT
-    Serial.print("Humidity: "); Serial.print(hum); Serial.print(" %, Temp: "); Serial.print(temp); Serial.println(" Celsius");
+    // Serial.print("Humidity: "); Serial.print(hum); Serial.print(" %, Temp: "); Serial.print(temp); Serial.println(" Celsius");
 
 }
 
@@ -344,6 +344,10 @@ void sgpFunc()
     // Copia para as variaveis globais o valor lido
     tvoc = sgp.TVOC;
     eco2 = sgp.eCO2;
+    // Serial.println("\nValor do TVOC = ");
+    // Serial.println(tvoc);
+    // Serial.println("\nValor do eCO2 = ");
+    // Serial.println(eco2);
 
 
 //      NÃO SEI SE É PRECISO ???
@@ -389,7 +393,11 @@ void GetDeviceInfoSps30()
     else Serial.println(F("not available"));
   }
   else
+  {
     ErrtoMess((char *) "could not get serial number", ret);
+    error_sps = 5;
+  }
+    
 
   // try to get product name
   ret = sps30.GetProductName(buf, 32);
@@ -400,7 +408,11 @@ void GetDeviceInfoSps30()
     else Serial.println(F("not available"));
   }
   else
+  {
     ErrtoMess((char *) "could not get product name.", ret);
+    error_sps = 6;
+  }
+    
 
   // try to get version info
   ret = sps30.GetVersion(&v);
@@ -442,6 +454,7 @@ bool spsFunc()
 
         if (error_cnt++ > 3) {
           ErrtoMess((char *) "Error during reading values: ",ret);
+          error_sps = 7;
           return(false);
         }
         delay(1000);
@@ -450,6 +463,7 @@ bool spsFunc()
     // if other error
     else if(ret != ERR_OK) {
       ErrtoMess((char *) "Error during reading values: ",ret);
+      error_sps = 7;
       return(false);
     }
 
@@ -505,8 +519,8 @@ void Errorloop(char *mess, uint8_t r)
   if (r) ErrtoMess(mess, r);
   else Serial.println(mess);
   // Comentar os dois comandos abaixo
-  Serial.println(F("Program on hold"));
-  for(;;) delay(100000);                        // Este é o problema de quando não há SPS30, o firmware deixa de funcionar !!!!  
+  //Serial.println(F("Program on hold"));
+  //for(;;) delay(100000);                        // Este é o problema de quando não há SPS30, o firmware deixa de funcionar !!!!  
 }
 
 /**
@@ -523,6 +537,97 @@ void ErrtoMess(char *mess, uint8_t r)
 
   sps30.GetErrDescription(r, buf, 80);
   Serial.println(buf);
+}
+
+void ErrorTestFunc(int error_sps)
+{
+  /*
+      Recebe o valor do erro e conforme o valor atribui-lhe a mensagem associada
+
+      - Criar uma String Global (MessageError) para o prettyPint
+  */
+
+  if (error_sps == 0)
+  {
+    // Não há erros
+    MessageError = "Não há erros no sensor :)";
+  }
+
+  else if (error_sps == 1)
+  {
+    /*
+      Local: Setup()
+      Motivo: Erro no canal de comunicação
+      Mensagem: Could not initialize communication channel.
+    */
+    MessageError = "Could not initialize communication channel";
+  }
+
+  else if (error_sps == 2)
+  {
+    /*
+      Local: Setup()
+      Motivo: Erro na conexão ao SPS30
+      Mensagem: Could not probe / connect with SPS30.
+    */
+    MessageError = "Could not probe / connect with SPS30";
+  }
+
+  else if (error_sps == 3)
+  {
+    /*
+      Local: Setup()
+      Motivo: Erro ao fazer reset ao SPS30
+      Mensagem: Could not reset.
+    */
+    MessageError = "Could not reset";
+  }
+
+  else if (error_sps == 4)
+  {
+    /*
+      Local: Setup()
+      Motivo: Erro ao fazer a leitura dos dados do SPS30
+      Mensagem: Could NOT start measurement.
+    */
+    MessageError = "Could NOT start measurement";
+  }
+
+  else if (error_sps == 5)
+  {
+    /*
+      Local: GetDeviceInfoSps30()
+      Motivo: Erro ao tentar obter o numero série do SPS30
+      Mensagem: could not get serial number.
+    */
+    MessageError = "Could not get serial number";
+  }
+
+  else if (error_sps == 6)
+  {
+    /*
+      Local: GetDeviceInfoSps30()
+      Motivo: Erro ao tentar obter o Nome do Produto do SPS30
+      Mensagem: Could not get product name.
+    */
+    MessageError = "Could not get product name";
+  }
+
+  else if (error_sps == 7)
+  {
+    /*
+      Local: SpsFunc()
+      Motivo: Erro durante a leitura dos valores do SPS30
+      Mensagem: Error during reading values.
+    */
+    MessageError = "Error during reading values";
+  }
+
+  else
+  {
+    // Nothing 
+  }
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -585,6 +690,9 @@ void CreateDados()
     {
       dados += ("&ErSgp="); dados += (error_sgp);   // Erro do SGP30 
     }
+    // Serial.print("\nDados -> \n");
+    // Serial.println(dados);
+    // Serial.print("\n");
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
@@ -606,12 +714,9 @@ void CreateDados()
     ////////////////////////////////////////////
 
 void setColor(int R, int G, int B) {
-  // #define LEDR 4        
-  // #define LEDG 5      
-  // #define LEDB 18       
-  analogWrite(LEDR, R);
-  analogWrite(LEDG, G);
-  analogWrite(LEDB, B);
+  digitalWrite(LEDR, R);
+  digitalWrite(LEDG, G);
+  digitalWrite(LEDB, B);
 }
 
 void AirQual()
@@ -625,9 +730,9 @@ void AirQual()
                     - Mas se a temp for acima dos 27ºC -> Mau
                 Se a humidade for acima dos 85% e qualquer temp -> Mau
             Nós lemos as PM1 , PM2.5 e PM10 e TVOC
-            Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
-            Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
-            Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
+            Se  0.0 >= PM2.5 <= 12.0 && 0.0 >= PM10 <= 54 && 0.0 >= TVOC <= 0.5 -> GOOD                         (GREEN)
+            Se 12.1 >= PM2.5 <= 35.4 && 55 >= PM10 <= 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
+            Se 35.5 >= PM2.5 <= 55.4 && 155 >= PM10 <= 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
             Se PM2.5 >= 55.5 && PM10 >= 255 && TVOC > 0.5 -> UNHEALTHY                                          (RED)
                 ATENÇÃO !!! FALTA A PARTE DO CO2 (https://www.ebay.com/itm/112691626960?mkevt=1&siteid=1&mkcid=2&mkrid=711-153320-877651-5&source_name=google&mktype=pla_ssc&campaignid=11826484955&groupid=114180021839&targeted=pla-293946777986&MT_ID=&adpos=&device=c&googleloc=1011776&itemid=112691626960&merchantid=116792603&geo_id=164&gclid=EAIaIQobChMIte_IhKba9QIViQUGAB0nfQFtEAYYAyABEgIPf_D_BwE)
         */
@@ -695,8 +800,8 @@ void AirQual()
         if (temp >= 19.0 && temp <= 27.0)
         {
             // CASO 1 - GOOD
-            // Se  0.0 >= PM2.5 =< 12.0 && 0.0 >= PM10 =< 54 && 0.0 >= TVOC =< 0.5 -> GOOD                         (GREEN)
-            if ((pm2 >= 0.0 && pm2 =< 12.0) && (pm10 >= 0 && pm10 =< 54) && (tvocF =< 0.5))
+            // Se  0.0 >= PM2.5 <= 12.0 && 0.0 >= PM10 <= 54 && 0.0 >= TVOC <= 0.5 -> GOOD                         (GREEN)
+            if ((pm2 >= 0.0 && pm2 <= 12.0) && (pm10 >= 0 && pm10 <= 54) && (tvocF <= 0.5))
             {
                 // Acender led com cor verde
                 setColor(0, 255, 0);
@@ -706,8 +811,8 @@ void AirQual()
             }
 
             // CASO 2 - MODERATE
-            // Se 12.1 >= PM2.5 =< 35.4 && 55 >= PM10 =< 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
-            if ((pm2 >= 12.1 && pm2 =< 35.4) && (pm10 >= 55 && pm10 =< 154) && (tvocF > 0.5))
+            // Se 12.1 >= PM2.5 <= 35.4 && 55 >= PM10 <= 154 && TVOC > 0.5 -> MODERATE                             (YELLOW)
+            if ((pm2 >= 12.1 && pm2 <= 35.4) && (pm10 >= 55 && pm10 <= 154) && (tvocF > 0.5))
             {
                 // Acender led com cor amarela
                 setColor(251, 255, 0);
@@ -717,8 +822,8 @@ void AirQual()
             }
 
             // CASO 3 - UNHEALTHY FOR SENTIVE GROUP
-            // Se 35.5 >= PM2.5 =< 55.4 && 155 >= PM10 =< 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
-            if ((pm2 >= 35.5 && pm2 =< 55.4) && (pm10 >= 155 && pm10 =< 254) && (tvocF > 0.5))
+            // Se 35.5 >= PM2.5 <= 55.4 && 155 >= PM10 <= 254 && TVOC > 0.5 -> UNHEALTHY FOR SENTIVE GROUP         (ORANGE)
+            if ((pm2 >= 35.5 && pm2 <= 55.4) && (pm10 >= 155 && pm10 <= 254) && (tvocF > 0.5))
             {
                 // Acender led com cor laranja
                 setColor(255, 170, 0);
@@ -740,6 +845,9 @@ void AirQual()
             
         }
     }
+    // Serial.print("\nLED -> \n");
+    // Serial.println(LedColour);
+    // Serial.print("\n");
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
@@ -772,6 +880,171 @@ void do_send(osjob_t* j) {
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+        0 : Azul - Default
+          // color code #0000FF (R = 0,  G = 0, B = 255)
+          // setColor(0, 0, 255);
+        1 : Amarelo - MODERATE
+          // color code #FBFF00 (R = 251,  G = 255, B = 0)
+          // setColor(251, 255, 0);
+        2 : Laranja - UNHEALTHY FOR SENTIVE GROUP
+          // color code #FFAA00 (R = 255,  G = 170, B = 0)
+          // setColor(255, 170, 0);
+        3 : Vermelho - UNHEALTHY
+          // color code #FFAA00 (R = 255,  G = 0, B = 0)
+          // setColor(255, 0, 0);
+        4 : Verde - GOOD
+          // color code #FFAA00 (R = 0,  G = 255, B = 0)
+          // setColor(0, 255, 0);
+        */
+
+void LedColorToText(int valueColor)
+{
+  if(valueColor == 0)
+  {
+    ColorToText = "Default State";
+  }
+
+  else if(valueColor == 1)
+  {
+    ColorToText = "Amarelo - MODERATE";
+  }
+
+  else if(valueColor == 2)
+  {
+    ColorToText = "Laranja - UNHEALTHY FOR SENTIVE GROUP";
+  }
+
+  else if(valueColor == 3)
+  {
+    ColorToText = "Vermelho - UNHEALTHY";
+  }
+
+  else if(valueColor == 4)
+  {
+    ColorToText = "Verde - GOOD";
+  }
+
+  else
+  {
+    ColorToText = "Unkown State";
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       INIT PRETTYPRINT                                                                   //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void PrettyPrint()
+{
+  // Init
+  Serial.print("\n###############################################################################################################");
+  Serial.print("\n################################################# ");
+  Serial.print(" INIT LOOP ");
+  Serial.print(" #################################################");
+  Serial.print("\n###############################################################################################################");
+
+  // Parte do DHT22
+  Serial.print("\n\n###############################################################################################################");
+  Serial.print("\n################################################## ");
+  Serial.print(MY_ID);
+  Serial.print(" ####################################################");
+  Serial.print("\n###############################################################################################################\n");
+  Serial.print("\nSensor DTH22 Values:");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> Temperature: ");
+  Serial.print(temp); Serial.print(" Celsius");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> Humidity: ");
+  Serial.print(hum);  Serial.print(" %");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\n##############################################################################################################");
+  Serial.print("\n##############################################################################################################");
+
+  // Parte do SGP30
+  Serial.print("\n##############################################################################################################\n");
+  Serial.print("\nSensor SGP30 Values:");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> TVOC: ");
+  Serial.print(tvoc);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> eCO2: ");
+  Serial.print(eco2);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\n##############################################################################################################");
+  Serial.print("\n##############################################################################################################");
+
+  // Parte do SPS30
+  Serial.print("\n##############################################################################################################\n");
+  Serial.print("\nSensor SPS30 Values:");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> PM 1.0: ");
+  Serial.print(ValuePM1);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> PM 2.5: ");
+  Serial.print(ValuePM2);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> PM 10.0: ");
+  Serial.print(ValuePM10);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\n##############################################################################################################");
+  Serial.print("\n##############################################################################################################");
+
+  // Parte do AirQual
+  Serial.print("\n##############################################################################################################\n");
+  Serial.print("\nData sended:");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> String Data: ");
+  Serial.print(dados);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\n##############################################################################################################");
+  Serial.print("\n##############################################################################################################");
+
+  // Parte do AirQual
+  LedColorToText(LedColour);
+  Serial.print("\n##############################################################################################################\n");
+  Serial.print("\nEstado do LED:");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> Modo: ");
+  Serial.print(ColorToText);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\n##############################################################################################################");
+  Serial.print("\n##############################################################################################################");
+
+  // Parte dos Erros - Chamar a Função ErrorTestFunc
+  ErrorTestFunc(error_sps);
+    // Imprimir a mensagem do erro
+  Serial.print("\n##############################################################################################################\n");
+  Serial.print("\n!!! Erros no Sistema !!!:");
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> Mensagem de erros no SPS30: ");
+  Serial.print(MessageError);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+
+  // End
+  Serial.print("\n\n##############################################################################################################");
+  Serial.print("\n############################################### ");
+  Serial.print(" END LOOP ");
+  Serial.print(" ###################################################");
+  Serial.print("\n##############################################################################################################\n\n");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       END PRETTYPRINT                                                                    //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       INIT SETUP                                                                         //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void setup() 
 {
@@ -789,21 +1062,41 @@ void setup()
 
   // Begin communication channel;
   if (! sps30.begin(SPS30_COMMS))
+  {
     Errorloop((char *) "could not initialize communication channel.", 0);
+    // Para este erro a variavel toma o valor de 1
+    error_sps = 1;
+  }
+    
 
   // check for SPS30 connection
-  if (! sps30.probe()) Errorloop((char *) "could not probe / connect with SPS30.", 0);
+  if (! sps30.probe())
+  {
+    Errorloop((char *) "could not probe / connect with SPS30.", 0);
+    // Para este erro a variavel toma o valor de 2
+    error_sps = 2;
+  } 
   else  Serial.println(F("Detected SPS30."));
 
   // reset SPS30 connection
-  if (! sps30.reset()) Errorloop((char *) "could not reset.", 0);
+  if (! sps30.reset())
+  {
+    Errorloop((char *) "could not reset.", 0);
+    // Para este erro a variavel toma o valor de 3
+    error_sps = 3;
+  } 
 
   // read device info
   GetDeviceInfoSps30();
 
   // start measurement
   if (sps30.start()) Serial.println(F("Measurement started"));
-  else Errorloop((char *) "Could NOT start measurement", 0);
+  else
+  {
+    Errorloop((char *) "Could NOT start measurement", 0);
+    // Para este erro a variavel toma o valor de 4
+    error_sps = 4;
+  } 
 
   //serialTrigger((char *) "Hit <enter> to continue reading");
 
@@ -817,9 +1110,9 @@ void setup()
   pinMode(LEDG, OUTPUT);
   pinMode(LEDB, OUTPUT);
   // Initialize LED LOW
-  digitalWrite(LEDR, LOW);
-  digitalWrite(LEDG, LOW);
-  digitalWrite(LEDB, LOW);
+  //digitalWrite(LEDR, LOW);
+  //digitalWrite(LEDG, LOW);
+  //digitalWrite(LEDB, LOW);
 
   // Initialize LoRa Communication
   // LMIC init
@@ -874,8 +1167,22 @@ void setup()
   if (TX_PIN != 0 && RX_PIN != 0) sps30.SetSerialPin(RX_PIN,TX_PIN);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       END SETUP                                                                          //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       INIT LOOP                                                                          //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void loop() 
 {
+  //Serial.print("### INICIO DO LOOP ###\n");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // LoRa Communication
@@ -888,7 +1195,7 @@ void loop()
     #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//Serial.print("### CHAMADA FUNCAO DHT22 ###\n");
     // Call dht22 function
     dht22();
 
@@ -896,7 +1203,7 @@ void loop()
         delay(1000);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//Serial.print("### CHAMADA FUNCAO SGP30 ###\n");
     // Call sgp30 function
     sgpFunc();
 
@@ -904,7 +1211,7 @@ void loop()
        delay(1000);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//Serial.print("### CHAMADA FUNCAO SPS30 ###\n");
     // Call sps30 function
     spsFunc();  
 
@@ -913,25 +1220,42 @@ void loop()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Function to create/prepare DADOS
-    CreateDados();
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//Serial.print("### CHAMADA FUNCAO AIRQUAL ###\n");
     // Function to show the Air Quality (LED)
     AirQual();
 
+      // Dealy between function ( 1sec = 1 000ms )
+       delay(1000);
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Serial.print("### CHAMADA FUNCAO CREATEDADOS ###\n");
+    // Function to create/prepare DADOS
+    CreateDados();
+
+      // Dealy between function ( 1sec = 1 000ms )
+       delay(1000);
+
+    
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Chamar o PrettyPrint
+PrettyPrint();
 
     dados.getBytes(mydata, sizeof(mydata)-1);
     // Clear Data
     dados = "";
+    LedColour = 0;
 
     // Delay to new Read    ( 5min = 30 000ms )
     delay(30000);
+    
+  // Serial.print("### FIM DO LOOP ###\n");
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                                          //
+//                                                       END LOOP                                                                           //
+//                                                                                                                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
     O QUE FALTA:
