@@ -19,9 +19,9 @@ The project is still under development and future updates will focus on the foll
 - [ ] Task 3
 - [ ] Task 4 -->
 - [ ] Firmware - New/Update features
-    - [ ] Implement Errors Function;
+    - [x] Implement Errors Function;
     - [ ] Implement User Output (LED Function);
-    - [ ] Organize and clean de code;
+    - [x] Organize and clean de code;
 - [ ] Web Aplication - Dashboard
     - [ ] Implement/Add the other schools;
     - [ ] Improve User Interface;
