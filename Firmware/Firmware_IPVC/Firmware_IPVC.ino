@@ -28,23 +28,15 @@
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
-// -> Autores:                                                                          //
+// -> Autor:                                                                            //
 //                                                                                      //
-//    * Jorge Manuel Silva - https://www.linkedin.com/in/jorge-manuel-silva-386567217/  //
-//                                                                                      //
-//////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                      //
-// -> Colaboradores:                                                                    //
-//                                                                                      //
-//    * Sérgio I. Lopes - https://www.linkedin.com/in/sergioivan/                       //
-//    * Emmanuel Lomba -                                                                //
-//    * António Abreu - https://www.linkedin.com/in/antonio-abreu-a93433145/            //
+//    * Jorge Manuel Silva                                                              //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
 // -> Last Firmware Update:                                                             //
 //                                                                                      //
-//    * 22/04/2022                                                                      //
+//    * 25/04/2022                                                                      //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -118,10 +110,48 @@ String ColorToText = "";
     String ValuePM1, ValuePM2, ValuePM10;  
 
     // Errors Part | If value = 1 -> Error in Sensor
-    int error_dht = 0,
-        error_sgp = 0, 
-        error_sps = 0;
-    String MessageError = "";
+    int 
+        // DHT22
+        error_dht = 0,
+          // Variaveis subjacentes
+          ErrorDataRead = 0,
+          ErrorCheck = 0;
+          // Mensagens de Erro
+          String MessageErrorDHT = "",
+          MessageErrorDHT1 = "",
+          MessageErrorDHT2 = "";
+
+        // SGP30
+        int error_sgp = 0, 
+          // Variaveis subjacentes
+          ErrorNotFound = 0,
+          ErrorMeasurementFailed = 0,
+          ErrorFailedRead = 0;
+          // Mensagens de Erro
+          String MessageErrorSGP = "",
+          MessageErrorSGP1 = "",
+          MessageErrorSGP2 = "",
+          MessageErrorSGP3 = "";
+
+        // SPS30 - Variavel Principal
+        int error_sps = 0,
+          // Variaveis subjacentes
+          ErrorCodeCommChann = 0,
+          ErrorCodeConnect = 0,
+          ErrorCodeReset = 0,
+          ErrorCodeMeasurement = 0,
+          ErrorCodeGetSerialNumber = 0,
+          ErrorCodeGetProductName = 0,
+          ErrorCodeReadValues= 0;
+          // Mensagens de Erro
+          String MessageError = "",
+          MessageError1 = "",
+          MessageError2 = "",
+          MessageError3 = "",
+          MessageError4 = "",
+          MessageError5 = "",
+          MessageError6 = "",
+          MessageError7 = "";
 
     // Cor do Led
         /*
@@ -246,6 +276,7 @@ void ErrorDHT(float Temperature, float Humidity)
             cntdht++;
             //Serial.println(F("Failed to read from DHT sensor!"));
             Serial.println(F("Error data read..."));
+            error_dht = 1; ErrorDataRead = 1;
             dht22();
             //return;
         }
@@ -262,8 +293,7 @@ void ErrorDHT(float Temperature, float Humidity)
             // Printar na console 
             Serial.println(F("Failed to read from DHT sensor! | Possible error, check sensor!"));
             // Adicionar report do erro à string de dados
-            //dados += ("&ErDht="); dados += (error_dht); 
-            error_dht = 1;
+            error_dht = 2; ErrorCheck = 1;
             
         // Voltar a meter a variavel do contador a ZERO
         cntdht = 0;
@@ -282,10 +312,6 @@ void dht22()
 
     // Check Erros
     ErrorDHT(temp, hum);
-
-    // PRINT IN CONSOLE RESULT
-    // Serial.print("Humidity: "); Serial.print(hum); Serial.print(" %, Temp: "); Serial.print(temp); Serial.println(" Celsius");
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,6 +337,7 @@ void ErrorSGP()
             // Incrementa o contador e tenta ler os valores outra vez
             cntsgp++;
             Serial.println(F("Measurement failed..."));
+            error_sps = 2; ErrorMeasurementFailed = 1;
             sgpFunc();
         }
         else
@@ -326,7 +353,7 @@ void ErrorSGP()
 
             // Printar na console 
             Serial.println(F("Failed to read from SGP30 sensor!"));
-
+            error_sps = 3; ErrorFailedRead = 1;
             // Adicionar report do erro à string de dados
             error_sgp = 1;
             
@@ -344,28 +371,8 @@ void sgpFunc()
     // Copia para as variaveis globais o valor lido
     tvoc = sgp.TVOC;
     eco2 = sgp.eCO2;
-    // Serial.println("\nValor do TVOC = ");
-    // Serial.println(tvoc);
-    // Serial.println("\nValor do eCO2 = ");
-    // Serial.println(eco2);
-
-
-//      NÃO SEI SE É PRECISO ???
-//    delay(1000);
-//   counter++;
-//   if (counter == 30) {
-//     counter = 0;
-
-//     uint16_t TVOC_base, eCO2_base;
-//     if (! sgp.getIAQBaseline(&eCO2_base, &TVOC_base)) {
-//       Serial.println("Failed to get baseline readings");
-//       return;
-//     }
-//     Serial.print("****Baseline values: eCO2: 0x"); Serial.print(eCO2_base, HEX);
-//     Serial.print(" & TVOC: 0x"); Serial.println(TVOC_base, HEX);
-//   }
-
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
 //                                                      END SGP30 PROCESS                                                                   //
@@ -395,10 +402,9 @@ void GetDeviceInfoSps30()
   else
   {
     ErrtoMess((char *) "could not get serial number", ret);
-    error_sps = 5;
+    error_sps = 5; ErrorCodeGetSerialNumber = 1;
   }
-    
-
+  
   // try to get product name
   ret = sps30.GetProductName(buf, 32);
   if (ret == ERR_OK)  {
@@ -410,7 +416,7 @@ void GetDeviceInfoSps30()
   else
   {
     ErrtoMess((char *) "could not get product name.", ret);
-    error_sps = 6;
+    error_sps = 6; ErrorCodeGetProductName = 1;
   }
     
 
@@ -454,7 +460,7 @@ bool spsFunc()
 
         if (error_cnt++ > 3) {
           ErrtoMess((char *) "Error during reading values: ",ret);
-          error_sps = 7;
+          error_sps = 7; ErrorCodeReadValues= 1; 
           return(false);
         }
         delay(1000);
@@ -463,7 +469,7 @@ bool spsFunc()
     // if other error
     else if(ret != ERR_OK) {
       ErrtoMess((char *) "Error during reading values: ",ret);
-      error_sps = 7;
+      error_sps = 7; ErrorCodeReadValues= 1; 
       return(false);
     }
 
@@ -529,6 +535,7 @@ void Errorloop(char *mess, uint8_t r)
  *  @param r : error code
  *
  */
+
 void ErrtoMess(char *mess, uint8_t r)
 {
   char buf[80];
@@ -539,96 +546,6 @@ void ErrtoMess(char *mess, uint8_t r)
   Serial.println(buf);
 }
 
-void ErrorTestFunc(int error_sps)
-{
-  /*
-      Recebe o valor do erro e conforme o valor atribui-lhe a mensagem associada
-
-      - Criar uma String Global (MessageError) para o prettyPint
-  */
-
-  if (error_sps == 0)
-  {
-    // Não há erros
-    MessageError = "Não há erros no sensor :)";
-  }
-
-  else if (error_sps == 1)
-  {
-    /*
-      Local: Setup()
-      Motivo: Erro no canal de comunicação
-      Mensagem: Could not initialize communication channel.
-    */
-    MessageError = "Could not initialize communication channel";
-  }
-
-  else if (error_sps == 2)
-  {
-    /*
-      Local: Setup()
-      Motivo: Erro na conexão ao SPS30
-      Mensagem: Could not probe / connect with SPS30.
-    */
-    MessageError = "Could not probe / connect with SPS30";
-  }
-
-  else if (error_sps == 3)
-  {
-    /*
-      Local: Setup()
-      Motivo: Erro ao fazer reset ao SPS30
-      Mensagem: Could not reset.
-    */
-    MessageError = "Could not reset";
-  }
-
-  else if (error_sps == 4)
-  {
-    /*
-      Local: Setup()
-      Motivo: Erro ao fazer a leitura dos dados do SPS30
-      Mensagem: Could NOT start measurement.
-    */
-    MessageError = "Could NOT start measurement";
-  }
-
-  else if (error_sps == 5)
-  {
-    /*
-      Local: GetDeviceInfoSps30()
-      Motivo: Erro ao tentar obter o numero série do SPS30
-      Mensagem: could not get serial number.
-    */
-    MessageError = "Could not get serial number";
-  }
-
-  else if (error_sps == 6)
-  {
-    /*
-      Local: GetDeviceInfoSps30()
-      Motivo: Erro ao tentar obter o Nome do Produto do SPS30
-      Mensagem: Could not get product name.
-    */
-    MessageError = "Could not get product name";
-  }
-
-  else if (error_sps == 7)
-  {
-    /*
-      Local: SpsFunc()
-      Motivo: Erro durante a leitura dos valores do SPS30
-      Mensagem: Error during reading values.
-    */
-    MessageError = "Error during reading values";
-  }
-
-  else
-  {
-    // Nothing 
-  }
-
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
@@ -690,10 +607,8 @@ void CreateDados()
     {
       dados += ("&ErSgp="); dados += (error_sgp);   // Erro do SGP30 
     }
-    // Serial.print("\nDados -> \n");
-    // Serial.println(dados);
-    // Serial.print("\n");
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
 //                                                      END CREATE DATA PROCESS                                                             //
@@ -845,9 +760,6 @@ void AirQual()
             
         }
     }
-    // Serial.print("\nLED -> \n");
-    // Serial.println(LedColour);
-    // Serial.print("\n");
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                                                          //
@@ -938,6 +850,260 @@ void LedColorToText(int valueColor)
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+    ////////////////////////////////////////////
+    //                                        //
+    //   Funções para no PrettyPrint          //
+    //                                        //
+    ////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////
+
+void ErrorSPSFuncPP(int error_sps)
+{
+
+  if (error_sps != 0)
+  {
+    /*  Local: Setup()
+        Motivo: Erro no canal de comunicação
+        Mensagem: Could not initialize communication channel.
+        Variavel Subjacente: ErrorCodeCommChann                 
+    */
+    if (ErrorCodeCommChann != 0)
+    {
+      //
+      MessageError1 = "Could not initialize communication channel";
+    }
+    else
+    {
+      //
+      MessageError1 = "";
+    }
+    /*  Local: Setup()
+        Motivo: Erro na conexão ao SPS30
+        Mensagem: Could not probe / connect with SPS30.
+        Variavel Subjacente: ErrorCodeConnect             
+    */ 
+    if (ErrorCodeConnect != 0)
+    {
+      //
+      MessageError2 = "Could not probe / connect with SPS30";
+    }
+    else
+    {
+      //
+      MessageError2 = "";
+    }
+    /*  Local: Setup()
+        Motivo: Erro ao fazer reset ao SPS30
+        Mensagem: Could not reset.
+        Variavel Subjacente: ErrorCodeReset       
+    */
+    if (ErrorCodeReset != 0)
+    {
+      MessageError3 = "Could not reset";
+    }
+    else
+    {
+      //
+      MessageError3 = "";
+    }
+    /*  Local: Setup()
+        Motivo: Erro ao fazer a leitura dos dados do SPS30
+        Mensagem: Could NOT start measurement.
+        Variavel Subjacente: ErrorCodeMeasurement           
+    */
+    if (ErrorCodeMeasurement != 0)
+    {
+      MessageError4 = " Could NOT start measurement";
+    }
+    else
+    {
+      //
+      MessageError4 = "";
+    }
+    /*
+        Local: GetDeviceInfoSps30()
+        Motivo: Erro ao tentar obter o Nome do Produto do SPS30
+        Mensagem: Could not get product name.
+        Variavel Subjacente: ErrorCodeGetProductName
+    */
+    if (ErrorCodeGetProductName != 0)
+    {
+      MessageError5 = "Could not get product name";
+    }
+    else
+    {
+      //
+      MessageError5 = "";
+    }
+    /*
+        Local: GetDeviceInfoSps30()
+        Motivo: Erro ao tentar obter o numero série do SPS30
+        Mensagem: could not get serial number.
+        Variavel Subjacente: ErrorCodeGetSerialNumber
+    */
+    if (ErrorCodeGetSerialNumber != 0)
+    {
+      MessageError6 = "Could not get serial number";
+    }
+    else
+    {
+      //
+      MessageError6 = "";
+    }
+    /*
+        Local: SpsFunc()
+        Motivo: Erro durante a leitura dos valores do SPS30
+        Mensagem: Error during reading values.
+        Variavel Subjacente: ErrorCodeReadValues
+    */
+    if (ErrorCodeReadValues != 0)
+    {
+      MessageError7 = "Error during reading values";
+    }
+    else
+    {
+      //
+      MessageError7 = "";
+    }
+  }
+  else
+  {
+    // Não há erros
+    MessageError = "Não há erros no sensor :)";
+    //Clean errors & strings SPS30
+    ErrorCodeCommChann = 0,
+    ErrorCodeConnect = 0,
+    ErrorCodeReset = 0,
+    ErrorCodeMeasurement = 0,
+    ErrorCodeGetSerialNumber = 0,
+    ErrorCodeGetProductName = 0,
+    ErrorCodeReadValues= 0;
+    MessageError1 = "",
+    MessageError2 = "",
+    MessageError3 = "",
+    MessageError4 = "",
+    MessageError5 = "",
+    MessageError6 = "",
+    MessageError7 = "";
+  }
+}
+
+void ErrorSGPFuncPP(int error_sgp)
+{
+  if (error_sgp != 0)
+  {
+    /*
+        Local: SetupSGP()
+        Motivo: Erro na conexão ao SGP30
+        Mensagem: Sensor SGP30 Not Found.
+        Variavel Subjacente: ErrorNotFound
+    */
+    if (ErrorNotFound != 0)
+    {
+      MessageErrorSGP1 = "Sensor SGP30 Not Found";
+    }
+    else
+    {
+      //
+      MessageErrorSGP1 = "";
+    }
+    /*
+        Local: ErrorSGP()
+        Motivo: Erro ao fazer a leitura dos dados do SGP30
+        Mensagem: Measurement Failed.
+        Variavel Subjacente: ErrorMeasurementFailed
+    */
+    if (ErrorMeasurementFailed != 0)
+    {
+      MessageErrorSGP2 = "Measurement Failed";
+    }
+    else
+    {
+      //
+      MessageErrorSGP2 = "";
+      // Clean errors & strings SGP30
+      ErrorNotFound = 0,
+      ErrorMeasurementFailed = 0,
+      ErrorFailedRead = 0;
+      MessageErrorSGP = "",
+      MessageErrorSGP1 = "",
+      MessageErrorSGP3 = "";
+    }
+    /*
+        Local: ErrorSGP()
+        Motivo: Erro na leitura dos dados do SGP30
+        Mensagem: Failed to read from SGP30 sensor.
+        Variavel Subjacente: ErrorFailedRead
+    */
+    if (ErrorFailedRead != 0)
+    {
+      MessageErrorSGP3 = "Failed to read from SGP30 sensor";
+    }
+    else
+    {
+      //
+      MessageErrorSGP3 = "";
+    }
+  }
+  else
+  {
+    // Não há erros
+    MessageErrorSGP = "Não há erros no sensor :)";
+  }
+}
+
+void ErrorDHTFuncPP(int error_dht)
+{
+  if (error_dht != 0)
+  {
+    /*
+        Local: ErrorDHT()
+        Motivo: Erro na leitura 
+        Mensagem: Error data read.
+        Variavel Subjacente: ErrorDataRead
+    */
+    if (ErrorFailedRead != 0)
+    {
+      MessageErrorDHT1 = "Error data read";
+    }
+    else
+    {
+      //
+      MessageErrorDHT1 = "";
+    }
+    /*
+        Local: ErrorDHT()
+        Motivo: Falha na obtençao de dados do sensor DHT22
+        Mensagem: Failed to read from DHT sensor! | Possible error, check sensor!
+        Variavel Subjacente: ErrorCheck
+    */
+    if (ErrorFailedRead != 0)
+    {
+      MessageErrorDHT2 = "Failed to read from DHT sensor | Possible error, check sensor";
+    }
+    else
+    {
+      //
+      MessageErrorDHT2 = "";
+    }
+  }
+  else
+  {
+    // Não há erros
+    MessageErrorDHT = "Não há erros no sensor :)";
+    // Clean errors & strings
+    ErrorDataRead = 0,
+    ErrorCheck = 0;
+    MessageErrorDHT1 = "",
+    MessageErrorDHT2 = "";
+  }
+}
+//////////////////////////////////////////////////////////////////////////
+
+
 void PrettyPrint()
 {
   // Init
@@ -1015,13 +1181,33 @@ void PrettyPrint()
   Serial.print("\n##############################################################################################################");
 
   // Parte dos Erros - Chamar a Função ErrorTestFunc
-  ErrorTestFunc(error_sps);
+  ErrorSPSFuncPP(error_sps);
+  ErrorSGPFuncPP(error_sgp);
+  ErrorDHTFuncPP(error_dht);
     // Imprimir a mensagem do erro
   Serial.print("\n##############################################################################################################\n");
-  Serial.print("\n!!! Erros no Sistema !!!:");
+  Serial.print("\n Erros no Sistema :");
   Serial.print("\n____________________________________________________________________________________________________________\n");
-  Serial.print("\n\t-> Mensagem de erros no SPS30: ");
-  Serial.print(MessageError);
+  Serial.print("\n\t-> Mensagens de erros no SPS30: ");
+  Serial.print("\n * "); Serial.print(MessageError);
+  Serial.print("\n * "); Serial.print(MessageError1);
+  Serial.print("\n * "); Serial.print(MessageError2);
+  Serial.print("\n * "); Serial.print(MessageError3);
+  Serial.print("\n * "); Serial.print(MessageError4);
+  Serial.print("\n * "); Serial.print(MessageError5);
+  Serial.print("\n * "); Serial.print(MessageError6);
+  Serial.print("\n * "); Serial.print(MessageError7);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> Mensagens de erros no SGP30: ");
+  Serial.print("\n * "); Serial.print(MessageErrorSGP);
+  Serial.print("\n * "); Serial.print(MessageErrorSGP1);
+  Serial.print("\n * "); Serial.print(MessageErrorSGP2);
+  Serial.print("\n * "); Serial.print(MessageErrorSGP3);
+  Serial.print("\n____________________________________________________________________________________________________________\n");
+  Serial.print("\n\t-> Mensagens de erros no DHT22: ");
+  Serial.print("\n * "); Serial.print(MessageErrorDHT);
+  Serial.print("\n * "); Serial.print(MessageErrorDHT1);
+  Serial.print("\n * "); Serial.print(MessageErrorDHT2);
   Serial.print("\n____________________________________________________________________________________________________________\n");
 
   // End
@@ -1046,15 +1232,8 @@ void PrettyPrint()
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void setup() 
+void SetupSPS()
 {
-  Serial.begin(9600);
-
-  /*
-
-      SPS30 SETUP
-
-  */
   sps30.EnableDebugging(DEBUG);
 
   // set pins to use for softserial and Serial1 on ESP32
@@ -1065,7 +1244,7 @@ void setup()
   {
     Errorloop((char *) "could not initialize communication channel.", 0);
     // Para este erro a variavel toma o valor de 1
-    error_sps = 1;
+    error_sps = 1; ErrorCodeCommChann = 1;
   }
     
 
@@ -1074,7 +1253,7 @@ void setup()
   {
     Errorloop((char *) "could not probe / connect with SPS30.", 0);
     // Para este erro a variavel toma o valor de 2
-    error_sps = 2;
+    error_sps = 2; ErrorCodeConnect = 1;
   } 
   else  Serial.println(F("Detected SPS30."));
 
@@ -1083,7 +1262,7 @@ void setup()
   {
     Errorloop((char *) "could not reset.", 0);
     // Para este erro a variavel toma o valor de 3
-    error_sps = 3;
+    error_sps = 3; ErrorCodeReset = 1;
   } 
 
   // read device info
@@ -1095,7 +1274,7 @@ void setup()
   {
     Errorloop((char *) "Could NOT start measurement", 0);
     // Para este erro a variavel toma o valor de 4
-    error_sps = 4;
+    error_sps = 4; ErrorCodeMeasurement = 1;
   } 
 
   //serialTrigger((char *) "Hit <enter> to continue reading");
@@ -1105,15 +1284,37 @@ void setup()
       Serial.println(F(" !!! Due to I2C buffersize only the SPS30 MASS concentration is available !!! \n"));
   }
 
-  // Initialize the digital pin as an output 
-  pinMode(LEDR, OUTPUT);
-  pinMode(LEDG, OUTPUT);
-  pinMode(LEDB, OUTPUT);
-  // Initialize LED LOW
-  //digitalWrite(LEDR, LOW);
-  //digitalWrite(LEDG, LOW);
-  //digitalWrite(LEDB, LOW);
+  // Initialize SPS 30
+  Serial.println(F("Trying to connect ..."));
+  // set driver debug level
+  sps30.EnableDebugging(DEBUG);
+  // set pins to use for softserial and Serial1 on ESP32
+  if (TX_PIN != 0 && RX_PIN != 0) sps30.SetSerialPin(RX_PIN,TX_PIN);
+}
 
+void SetupSGP()
+{
+  // Initialize SGP 30
+  if (!sgp.begin())
+  {
+    Serial.println("Sensor SGP30 not found ...");
+    error_sgp = 1; ErrorNotFound = 1;
+    return;
+  }
+  Serial.print("Found SGP30 //Serial #");
+  Serial.print(sgp.serialnumber[0], HEX);
+  Serial.print(sgp.serialnumber[1], HEX);
+  Serial.println(sgp.serialnumber[2], HEX);
+}
+
+void SetupDHT()
+{
+  // Initialize dht 
+  dht.begin();
+}
+
+void SetupLoRa()
+{
   // Initialize LoRa Communication
   // LMIC init
   os_init();
@@ -1143,28 +1344,24 @@ void setup()
   LMIC_setDrTxpow(DR_SF7, 14);
   // Start job -- Transmit a message on begin
   do_send(&sendjob);
-  
-  // Initialize dht 
-  dht.begin();
+}
 
-  // Initialize SGP 30
-  if (!sgp.begin())
-  {
-    Serial.println("Sensor SGP30 not found ...");
-    //while (1);
-    return;
-  }
-  Serial.print("Found SGP30 //Serial #");
-  Serial.print(sgp.serialnumber[0], HEX);
-  Serial.print(sgp.serialnumber[1], HEX);
-  Serial.println(sgp.serialnumber[2], HEX);
 
-  // Initialize SPS 30
-  Serial.println(F("Trying to connect ..."));
-  // set driver debug level
-  sps30.EnableDebugging(DEBUG);
-  // set pins to use for softserial and Serial1 on ESP32
-  if (TX_PIN != 0 && RX_PIN != 0) sps30.SetSerialPin(RX_PIN,TX_PIN);
+
+void setup() 
+{
+  Serial.begin(9600);
+
+  // Call Setup's
+  SetupLoRa();
+  SetupSPS();
+  SetupSGP();
+  SetupDHT();
+
+  // Initialize the digital pin as an output 
+  pinMode(LEDR, OUTPUT);
+  pinMode(LEDG, OUTPUT);
+  pinMode(LEDB, OUTPUT);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1182,7 +1379,6 @@ void setup()
 
 void loop() 
 {
-  //Serial.print("### INICIO DO LOOP ###\n");
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // LoRa Communication
@@ -1195,7 +1391,6 @@ void loop()
     #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Serial.print("### CHAMADA FUNCAO DHT22 ###\n");
     // Call dht22 function
     dht22();
 
@@ -1203,7 +1398,6 @@ void loop()
         delay(1000);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Serial.print("### CHAMADA FUNCAO SGP30 ###\n");
     // Call sgp30 function
     sgpFunc();
 
@@ -1211,7 +1405,6 @@ void loop()
        delay(1000);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Serial.print("### CHAMADA FUNCAO SPS30 ###\n");
     // Call sps30 function
     spsFunc();  
 
@@ -1220,7 +1413,6 @@ void loop()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Serial.print("### CHAMADA FUNCAO AIRQUAL ###\n");
     // Function to show the Air Quality (LED)
     AirQual();
 
@@ -1228,7 +1420,6 @@ void loop()
        delay(1000);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Serial.print("### CHAMADA FUNCAO CREATEDADOS ###\n");
     // Function to create/prepare DADOS
     CreateDados();
 
@@ -1240,15 +1431,16 @@ void loop()
 // Chamar o PrettyPrint
 PrettyPrint();
 
+// Clear all Datas
     dados.getBytes(mydata, sizeof(mydata)-1);
-    // Clear Data
+    // Clean Data
     dados = "";
+    // Clean Led atribution color
     LedColour = 0;
-
+    
     // Delay to new Read    ( 5min = 30 000ms )
     delay(30000);
     
-  // Serial.print("### FIM DO LOOP ###\n");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1256,13 +1448,3 @@ PrettyPrint();
 //                                                       END LOOP                                                                           //
 //                                                                                                                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*
-    O QUE FALTA:
-        * Comunicação LoRa;                         (Feito mas falta testar!)
-        * LED Output;                               (Feito mas falta testar!)
-        * Lógica dos erros;                         (Feito mas falta testar!)
-
-    Falta a atribuição dos erros no Sensor SPS30, pois tem diversos erros que podem acontecer.
-      Ideia - Passar um INT com o valor do erro e no lado do Server ver qual o valor desse erro e imprimir o erro na Aplicação Web !!!
-*/
