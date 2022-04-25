@@ -21,7 +21,7 @@ The project is still under development and future updates will focus on the foll
 - [ ] Firmware - New/Update features
     - [x] Implement Errors Function;
     - [ ] Implement User Output (LED Function);
-    - [x] Organize and clean de code;
+    - [x] Organize and clean the code;
 - [ ] Web Aplication - Dashboard
     - [ ] Implement/Add the other schools;
     - [ ] Improve User Interface;
