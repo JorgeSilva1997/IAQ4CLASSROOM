@@ -36,7 +36,7 @@
 //                                                                                      //
 // -> Last Firmware Update:                                                             //
 //                                                                                      //
-//    * 25/04/2022                                                                      //
+//    * 02/05/2022                                                                      //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,8 @@ Adafruit_SGP30 sgp;
 SPS30 sps30;
 
 /*  DEFINE ID ESP32 */
-#define MY_ID   "DIAQ002"
+//#define MY_ID   "DIAQ002"
+#define MY_ID   "DIAQ006"
 
 /*  SPS30 CONFS */
 #define SPS30_COMMS I2C_COMMS
@@ -75,6 +76,7 @@ void ErrtoMess(char *mess, uint8_t r);
 void Errorloop(char *mess, uint8_t r);
 void GetDeviceInfoSps30();
 bool spsFunc();
+//void SetAutoClean();
 
 
 /*  DHT22 CONFS */
@@ -108,6 +110,7 @@ String ColorToText = "";
 
     // For SPS 30
     String ValuePM1, ValuePM2, ValuePM10;  
+    // int cntSPS30 = 0;
 
     // Errors Part | If value = 1 -> Error in Sensor
     int 
@@ -168,9 +171,13 @@ String ColorToText = "";
 
     #define SEND_BY_TIMER 2 // Send a message every TX_INTERVAL seconds
     
-    static const PROGMEM u1_t NWKSKEY[16] = { 0xd9, 0x75, 0x24, 0xc0, 0xf2, 0x09, 0x52, 0x65, 0xa4, 0x85, 0xa0, 0x8c, 0x83, 0x8d, 0x11, 0x10 };
-    static const u1_t PROGMEM APPSKEY[16] = { 0xf6, 0x5a, 0xdf, 0x86, 0x63, 0x77, 0xc8, 0x0c, 0x67, 0x56, 0x76, 0xc0, 0x85, 0x29, 0x20, 0xd9 };
-    static const u4_t DEVADDR = 0x0047a2ce;
+    // static const PROGMEM u1_t NWKSKEY[16] = { 0xd9, 0x75, 0x24, 0xc0, 0xf2, 0x09, 0x52, 0x65, 0xa4, 0x85, 0xa0, 0x8c, 0x83, 0x8d, 0x11, 0x10 };
+    // static const u1_t PROGMEM APPSKEY[16] = { 0xf6, 0x5a, 0xdf, 0x86, 0x63, 0x77, 0xc8, 0x0c, 0x67, 0x56, 0x76, 0xc0, 0x85, 0x29, 0x20, 0xd9 };
+    // static const u4_t DEVADDR = 0x0047a2ce;
+
+    static const PROGMEM u1_t NWKSKEY[16] = { 0x8b, 0xb0, 0x6a, 0x31, 0x9c, 0x98, 0xdc, 0x02, 0x34, 0x37, 0xaa, 0x35, 0x0c, 0x3b, 0xa3, 0xb0 };
+    static const u1_t PROGMEM APPSKEY[16] = { 0x8f, 0x6b, 0x0d, 0x3c, 0x66, 0x79, 0x33, 0x7b, 0x0a, 0x3a, 0xd7, 0x9d, 0x1d, 0xd0, 0x99, 0x6e };
+    static const u4_t DEVADDR = 0x045bf325;
 
     void os_getArtEui (u1_t* buf) { }
     void os_getDevEui (u1_t* buf) { }
@@ -510,6 +517,9 @@ bool spsFunc()
   Serial.print(val.PartSize);
   Serial.print(F("\n"));
 
+  // Incrementa o contador das vezes que já leu consequentemente
+  // cntSPS30++;
+
   return(true);
 }
 
@@ -757,6 +767,12 @@ void AirQual()
                 // Alterar a variavel LedColour para a cor vermelha
                 LedColour = 3;
             }
+
+            // Acender led com cor amarela
+            setColor(251, 255, 0);
+            
+            // Alterar a variavel LedColour para a cor amarela
+            LedColour = 1;
             
         }
     }
@@ -853,7 +869,7 @@ void LedColorToText(int valueColor)
 
     ////////////////////////////////////////////
     //                                        //
-    //   Funções para no PrettyPrint          //
+    //   Funções para ajudar no PrettyPrint   //
     //                                        //
     ////////////////////////////////////////////
 
@@ -1411,6 +1427,9 @@ void loop()
         // Dealy between function ( 1sec = 1 000ms )
        delay(1000);
 
+       // Auto Clean Function - Após 10 leituras p.e
+       //SetAutoClean();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Function to show the Air Quality (LED)
@@ -1438,8 +1457,8 @@ PrettyPrint();
     // Clean Led atribution color
     LedColour = 0;
     
-    // Delay to new Read    ( 5min = 30 000ms )
-    delay(30000);
+    // Delay to new Read    ( 5min = 300 000 ms )
+    delay(300000);
     
 }
 
