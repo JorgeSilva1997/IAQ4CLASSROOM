@@ -45,9 +45,9 @@ Device: DIAQ01
 <hr>
 
 Device: DIAQ02
-* Device Address: .. .. .. ..
-* NWK Key: .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
-* APP Key: .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+* Device Address: 00 47 a2 ce
+* NWK Key: d9 75 24 c0 f2 09 52 65 a4 85 a0 8c 83 8d 11 10
+* APP Key: f6 5a df 86 63 77 c8 0c 67 56 76 c0 85 29 20 d9
 <hr>
 
 Device: DIAQ03
