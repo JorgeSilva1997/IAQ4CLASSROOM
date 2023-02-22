@@ -20,19 +20,19 @@ The project is still under development and future updates will focus on the foll
 - [ ] Task 4 -->
 - [ ] Firmware - New/Update features
     - [x] Implement Errors Function;
-    - [ ] Implement User Output (LED Function);
+    - [x] Implement User Output (LED Function);
     - [x] Organize and clean the code;
 - [ ] Web Aplication - Dashboard
-    - [ ] Implement/Add the other schools;
-    - [ ] Improve User Interface;
+    - [x] Implement/Add the other schools;
+    - [x] Improve User Interface;
     - [ ] Implement/Add Notifications/Alerts;
-    - [ ] Implement/Add Admin Mode;
-    - [ ] Implement/Add Guest Mode;
+    - [x] Implement/Add Admin Mode;
+    - [x] Implement/Add Guest Mode;
 - [ ] Testing & Validation
     - [ ] Testing our prototypes with professional CO2 sensor. Duration 1 or 2 week
     - [ ] Make a validation using MatLab or Octave to prove the efficiency of our prototypes.
 - [ ] Reporting
-    - [ ] Creating a report or article.
+    - [x] Creating a report or article.
 <br>
 
 
